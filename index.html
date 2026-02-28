@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tea Sales Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 15px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      margin-bottom: 15px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    button {
+      background: #111827;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .record {
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+    .summary p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>☕ Tea Sales Manager</h1>
+
+<div class="card">
+  <input type="date" id="date">
+  <input type="number" id="tea" placeholder="Normal Tea">
+  <input type="number" id="lemon" placeholder="Lemon Tea">
+  <input type="number" id="coffee" placeholder="Coffee">
+  <input type="number" id="maska" placeholder="Maska Pav">
+  <button onclick="saveRecord()">Save Record</button>
+</div>
+
+<div class="card summary">
+  <h3>📊 Monthly Summary</h3>
+  <p>Total Tea: <span id="totalTea">0</span></p>
+  <p>Total Lemon Tea: <span id="totalLemon">0</span></p>
+  <p>Total Coffee: <span id="totalCoffee">0</span></p>
+  <p>Total Maska Pav: <span id="totalMaska">0</span></p>
+  <p><b>Total Income: ₹<span id="totalIncome">0</span></b></p>
+</div>
+
+<div class="card">
+  <h3>📅 All Records</h3>
+  <div id="records"></div>
+</div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem("teaData")) || [];
+
+  function saveRecord() {
+    const record = {
+      date: document.getElementById("date").value,
+      tea: Number(document.getElementById("tea").value) || 0,
+      lemon: Number(document.getElementById("lemon").value) || 0,
+      coffee: Number(document.getElementById("coffee").value) || 0,
+      maska: Number(document.getElementById("maska").value) || 0
+    };
+
+    if (!record.date) {
+      alert("Please select date");
+      return;
+    }
+
+    records.push(record);
+    localStorage.setItem("teaData", JSON.stringify(records));
+    display();
+    document.querySelectorAll("input").forEach(i => i.value = "");
+  }
+
+  function display() {
+    const container = document.getElementById("records");
+    container.innerHTML = "";
+
+    let totalTea = 0, totalLemon = 0, totalCoffee = 0, totalMaska = 0;
+
+    records.forEach((r, index) => {
+      totalTea += r.tea;
+      totalLemon += r.lemon;
+      totalCoffee += r.coffee;
+      totalMaska += r.maska;
+
+      container.innerHTML += `
+        <div class="record">
+          ${r.date} | Tea: ${r.tea} | Lemon: ${r.lemon} | Coffee: ${r.coffee} | Maska: ${r.maska}
+          <br>
+          <button onclick="deleteRecord(${index})" style="background:red;margin-top:5px;">Delete</button>
+        </div>
+      `;
+    });
+
+    document.getElementById("totalTea").innerText = totalTea;
+    document.getElementById("totalLemon").innerText = totalLemon;
+    document.getElementById("totalCoffee").innerText = totalCoffee;
+    document.getElementById("totalMaska").innerText = totalMaska;
+
+    document.getElementById("totalIncome").innerText =
+      (totalTea * 10) + (totalLemon * 20) + (totalCoffee * 30) + (totalMaska * 20);
+  }
+
+  function deleteRecord(index) {
+    records.splice(index, 1);
+    localStorage.setItem("teaData", JSON.stringify(records));
+    display();
+  }
+
+  display();
+</script>
+
+</body>
+</html>
