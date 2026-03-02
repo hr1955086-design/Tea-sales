@@ -1,139 +1,197 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tea Sales Manager</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 15px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .card {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      margin-bottom: 15px;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-    }
-    button {
-      background: #111827;
-      color: white;
-      border: none;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    .record {
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-      padding: 8px 0;
-    }
-    .summary p {
-      margin: 4px 0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tea Sales - Hamid Raza</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+padding:15px;
+}
+h1{
+text-align:center;
+color:#2c3e50;
+}
+.card{
+background:white;
+padding:15px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+margin-bottom:15px;
+}
+input,select,button{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+button{
+background:#2c3e50;
+color:white;
+border:none;
+}
+button:hover{
+opacity:0.9;
+}
+.delete{
+background:#e74c3c;
+}
+.edit{
+background:#27ae60;
+}
+.totalBox{
+background:#dff9fb;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+}
+</style>
 </head>
 <body>
 
-<h1>☕ Tea Sales Manager</h1>
+<h1>Hamid Raza</h1>
 
 <div class="card">
-  <input type="date" id="date">
-  <input type="number" id="tea" placeholder="Normal Tea">
-  <input type="number" id="lemon" placeholder="Lemon Tea">
-  <input type="number" id="coffee" placeholder="Coffee">
-  <input type="number" id="maska" placeholder="Maska Pav">
-  <button onclick="saveRecord()">Save Record</button>
+<h3>Add Entry</h3>
+
+<input type="text" id="date" readonly>
+
+<select id="timeSlot">
+<option value="6:00 AM">6:00 AM</option>
+<option value="10:00 AM">10:00 AM</option>
+<option value="4:00 PM">4:00 PM</option>
+<option value="7:00 PM">7:00 PM</option>
+<option value="custom">Custom Time</option>
+</select>
+
+<input type="text" id="customTime" placeholder="Enter Custom Time">
+
+<input type="number" id="chai" placeholder="Chai Count">
+<input type="number" id="coffee" placeholder="Coffee Count">
+<input type="number" id="maskapav" placeholder="Maska Pav Count">
+<input type="number" id="lemontea" placeholder="Lemon Tea Count">
+
+<button onclick="saveData()">Save</button>
+<button onclick="downloadPDF()">Download Monthly PDF</button>
+
+<div class="totalBox" id="totals"></div>
+
 </div>
 
-<div class="card summary">
-  <h3>📊 Monthly Summary</h3>
-  <p>Total Tea: <span id="totalTea">0</span></p>
-  <p>Total Lemon Tea: <span id="totalLemon">0</span></p>
-  <p>Total Coffee: <span id="totalCoffee">0</span></p>
-  <p>Total Maska Pav: <span id="totalMaska">0</span></p>
-  <p><b>Total Income: ₹<span id="totalIncome">0</span></b></p>
-</div>
-
-<div class="card">
-  <h3>📅 All Records</h3>
-  <div id="records"></div>
-</div>
+<div id="records"></div>
 
 <script>
-  let records = JSON.parse(localStorage.getItem("teaData")) || [];
+let data = JSON.parse(localStorage.getItem("teaData")) || [];
+let editingIndex = null;
 
-  function saveRecord() {
-    const record = {
-      date: document.getElementById("date").value,
-      tea: Number(document.getElementById("tea").value) || 0,
-      lemon: Number(document.getElementById("lemon").value) || 0,
-      coffee: Number(document.getElementById("coffee").value) || 0,
-      maska: Number(document.getElementById("maska").value) || 0
-    };
+document.getElementById("date").value =
+new Date().toLocaleDateString();
 
-    if (!record.date) {
-      alert("Please select date");
-      return;
-    }
+function saveData(){
+let date = document.getElementById("date").value;
+let time = document.getElementById("timeSlot").value;
+if(time==="custom"){
+time=document.getElementById("customTime").value;
+}
 
-    records.push(record);
-    localStorage.setItem("teaData", JSON.stringify(records));
-    display();
-    document.querySelectorAll("input").forEach(i => i.value = "");
-  }
+let chai = parseInt(document.getElementById("chai").value)||0;
+let coffee = parseInt(document.getElementById("coffee").value)||0;
+let maskapav = parseInt(document.getElementById("maskapav").value)||0;
+let lemontea = parseInt(document.getElementById("lemontea").value)||0;
 
-  function display() {
-    const container = document.getElementById("records");
-    container.innerHTML = "";
+let entry = {date,time,chai,coffee,maskapav,lemontea};
 
-    let totalTea = 0, totalLemon = 0, totalCoffee = 0, totalMaska = 0;
+if(editingIndex!==null){
+data[editingIndex]=entry;
+editingIndex=null;
+}else{
+data.push(entry);
+}
 
-    records.forEach((r, index) => {
-      totalTea += r.tea;
-      totalLemon += r.lemon;
-      totalCoffee += r.coffee;
-      totalMaska += r.maska;
+localStorage.setItem("teaData",JSON.stringify(data));
+clearForm();
+displayData();
+}
 
-      container.innerHTML += `
-        <div class="record">
-          ${r.date} | Tea: ${r.tea} | Lemon: ${r.lemon} | Coffee: ${r.coffee} | Maska: ${r.maska}
-          <br>
-          <button onclick="deleteRecord(${index})" style="background:red;margin-top:5px;">Delete</button>
-        </div>
-      `;
-    });
+function clearForm(){
+document.getElementById("chai").value="";
+document.getElementById("coffee").value="";
+document.getElementById("maskapav").value="";
+document.getElementById("lemontea").value="";
+document.getElementById("customTime").value="";
+}
 
-    document.getElementById("totalTea").innerText = totalTea;
-    document.getElementById("totalLemon").innerText = totalLemon;
-    document.getElementById("totalCoffee").innerText = totalCoffee;
-    document.getElementById("totalMaska").innerText = totalMaska;
+function displayData(){
+let recordsDiv=document.getElementById("records");
+recordsDiv.innerHTML="";
+let totalChai=0,totalCoffee=0,totalMaska=0,totalLemon=0;
 
-    document.getElementById("totalIncome").innerText =
-      (totalTea * 10) + (totalLemon * 20) + (totalCoffee * 30) + (totalMaska * 20);
-  }
+data.forEach((entry,index)=>{
+totalChai+=entry.chai;
+totalCoffee+=entry.coffee;
+totalMaska+=entry.maskapav;
+totalLemon+=entry.lemontea;
 
-  function deleteRecord(index) {
-    records.splice(index, 1);
-    localStorage.setItem("teaData", JSON.stringify(records));
-    display();
-  }
+recordsDiv.innerHTML+=`
+<div class="card">
+<b>${entry.date} - ${entry.time}</b><br>
+Chai: ${entry.chai} |
+Coffee: ${entry.coffee} |
+Maska Pav: ${entry.maskapav} |
+Lemon Tea: ${entry.lemontea}
+<br><br>
+<button class="edit" onclick="editEntry(${index})">Edit</button>
+<button class="delete" onclick="deleteEntry(${index})">Delete</button>
+</div>
+`;
+});
 
-  display();
+document.getElementById("totals").innerHTML=
+`<b>Monthly Total:</b><br>
+Chai: ${totalChai}<br>
+Coffee: ${totalCoffee}<br>
+Maska Pav: ${totalMaska}<br>
+Lemon Tea: ${totalLemon}`;
+}
+
+function editEntry(index){
+let entry=data[index];
+document.getElementById("chai").value=entry.chai;
+document.getElementById("coffee").value=entry.coffee;
+document.getElementById("maskapav").value=entry.maskapav;
+document.getElementById("lemontea").value=entry.lemontea;
+editingIndex=index;
+}
+
+function deleteEntry(index){
+let confirmDelete=prompt("Type DELETE to confirm");
+if(confirmDelete==="DELETE"){
+data.splice(index,1);
+localStorage.setItem("teaData",JSON.stringify(data));
+displayData();
+}
+}
+
+function downloadPDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+doc.text("Hamid Raza - Monthly Tea Record",10,10);
+
+let y=20;
+data.forEach(entry=>{
+doc.text(`${entry.date} ${entry.time} - Chai:${entry.chai} Coffee:${entry.coffee} Maska:${entry.maskapav} Lemon:${entry.lemontea}`,10,y);
+y+=10;
+});
+
+doc.save("Tea_Record.pdf");
+}
+
+displayData();
 </script>
 
 </body>
