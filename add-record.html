@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add Record - Hamid Raza</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+background:#3498db;
+color:white;
+font-size:16px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Add Daily Record</h1>
+
+<div class="card">
+
+<label>Date</label>
+<input type="date" id="date">
+
+<label>Customer</label>
+<select id="customer"></select>
+
+<label>Chai</label>
+<input type="number" id="chai" value="0">
+
+<label>Coffee</label>
+<input type="number" id="coffee" value="0">
+
+<label>Lemon Tea</label>
+<input type="number" id="lemon" value="0">
+
+<button onclick="saveRecord()">Save Record</button>
+
+</div>
+
+<script>
+
+let customers = JSON.parse(localStorage.getItem("customers")) || [];
+let records = JSON.parse(localStorage.getItem("records")) || [];
+
+let customerSelect = document.getElementById("customer");
+
+customers.forEach(c=>{
+let option=document.createElement("option");
+option.text=c;
+customerSelect.add(option);
+});
+
+document.getElementById("date").value =
+new Date().toISOString().split('T')[0];
+
+function saveRecord(){
+
+let data={
+date:document.getElementById("date").value,
+customer:customerSelect.value,
+chai:document.getElementById("chai").value,
+coffee:document.getElementById("coffee").value,
+lemon:document.getElementById("lemon").value
+};
+
+records.push(data);
+
+localStorage.setItem("records",JSON.stringify(records));
+
+alert("Record Saved");
+
+}
+
+</script>
+
+</body>
+</html>
