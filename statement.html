@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Monthly Statement</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+margin-top:20px;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+th{
+background:#3498db;
+color:white;
+}
+
+.total{
+font-weight:bold;
+background:#ecf0f1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Monthly Statement</h1>
+
+<label>Select Customer</label>
+<select id="customer"></select>
+
+<table id="table">
+
+<tr>
+<th>Date</th>
+<th>Chai</th>
+<th>Coffee</th>
+<th>Lemon Tea</th>
+</tr>
+
+</table>
+
+<h3 id="totals"></h3>
+
+<script>
+
+let customers = JSON.parse(localStorage.getItem("customers")) || [];
+let records = JSON.parse(localStorage.getItem("records")) || [];
+
+let customerSelect = document.getElementById("customer");
+
+customers.forEach(c=>{
+let option=document.createElement("option");
+option.text=c;
+customerSelect.add(option);
+});
+
+customerSelect.onchange = loadData;
+
+function loadData(){
+
+let table = document.getElementById("table");
+
+table.innerHTML = `
+<tr>
+<th>Date</th>
+<th>Chai</th>
+<th>Coffee</th>
+<th>Lemon Tea</th>
+</tr>
+`;
+
+let chaiTotal=0;
+let coffeeTotal=0;
+let lemonTotal=0;
+
+records.forEach(r=>{
+
+if(r.customer==customerSelect.value){
+
+table.innerHTML += `
+<tr>
+<td>${r.date}</td>
+<td>${r.chai}</td>
+<td>${r.coffee}</td>
+<td>${r.lemon}</td>
+</tr>
+`;
+
+chaiTotal += Number(r.chai);
+coffeeTotal += Number(r.coffee);
+lemonTotal += Number(r.lemon);
+
+}
+
+});
+
+let chaiPrice = chaiTotal*10;
+let coffeePrice = coffeeTotal*30;
+let lemonPrice = lemonTotal*20;
+
+let grandTotal = chaiPrice + coffeePrice + lemonPrice;
+
+document.getElementById("totals").innerHTML =
+
+`Total Chai: ${chaiTotal} (₹${chaiPrice}) <br>
+Total Coffee: ${coffeeTotal} (₹${coffeePrice}) <br>
+Total Lemon Tea: ${lemonTotal} (₹${lemonPrice}) <br><br>
+<b>Grand Total: ₹${grandTotal}</b>`;
+
+}
+
+</script>
+
+</body>
+</html>
