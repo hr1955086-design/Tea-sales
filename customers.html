@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Customers - Hamid Raza</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+background:#27ae60;
+color:white;
+font-size:16px;
+}
+
+.customer{
+background:white;
+padding:10px;
+margin-top:8px;
+border-radius:6px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Customers</h1>
+
+<div class="card">
+
+<input id="name" placeholder="Customer Name">
+
+<button onclick="addCustomer()">Add Customer</button>
+
+</div>
+
+<div id="list"></div>
+
+<script>
+
+let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+function showCustomers(){
+
+let html="";
+
+customers.forEach((c,i)=>{
+html += `<div class="customer">${c}</div>`;
+});
+
+document.getElementById("list").innerHTML = html;
+
+}
+
+function addCustomer(){
+
+let name=document.getElementById("name").value;
+
+if(name=="") return;
+
+customers.push(name);
+
+localStorage.setItem("customers",JSON.stringify(customers));
+
+document.getElementById("name").value="";
+
+showCustomers();
+
+}
+
+showCustomers();
+
+</script>
+
+</body>
+</html>
